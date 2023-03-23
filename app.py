@@ -142,6 +142,12 @@ def format_response(text):
     if len(indexes) == 1:
         indexes = indexes + len(lines)
     clean_text = "\n".join(lines[indexes[0]+1: indexes[1]])
+
+    if not clean_text.strip().startswith("<"):
+        index = clean_text.find("<")
+        if index >= 0:
+            clean_text = clean_text[index:len(clean_text)]
+
     return clean_text
 
 
@@ -168,6 +174,10 @@ fff3
 print(format_response(x))
 x="""
 fff4
+"""
+print(format_response(x))
+x="""
+fff5\n\n<x>
 """
 print(format_response(x))
 
