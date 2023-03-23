@@ -10,36 +10,65 @@ app = Flask(__name__)
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 
-@app.route("/", methods=("GET", "POST"))
+@app.route("/restart", methods=[ "POST" ])
+def restart(): 
+    restart_chat()
+    return "OK"
+
+@app.route("/dryrun", methods=[ "POST" ])
+def dryrun(): 
+    print("---------------")
+    print("---------------")
+    print("---------------")
+    print(request.data)
+    print("---------------")
+    print("---------------")
+    params = json.loads(request.data)
+    print(params)
+    chat = load_chat()
+    chat = chat + generate_next_chat_items(params)
+    dump_chat(chat)
+    result="<html>new</html>"
+
+    return compose_response(result) 
+
+def compose_response(code):
+    return json.dumps({"new_code": code})
+
+@app.route("/", methods=[ "POST" ])
 def index(): 
-    if request.method == "POST":
-        chat = load_chat()
-        chat = chat + generate_next_chat_item(request)
-        dump_chat(chat)
+    chat = load_chat()
+    params = json.loads(request.data)
+    chat = chat + generate_next_chat_items(params)
+    dump_chat(chat)
 
-        animal = request.form["animal"]
-        prompt = generate_prompt(animal)
-        print("Prompt: {}".format(prompt))
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-             messages=chat        )
-        print("response: {}".format(response))
-        return redirect(url_for("index", result=response.choices[0].message.content))
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=chat        
+        )
+    print("response: {}".format(response))
 
-    result = request.args.get("result")
+    result=response.choices[0].message.content
+
     chat = load_chat() + generate_next_response(result)
     dump_chat(chat)
 
     store_html_code(result)
 
-    return render_template("index.html", result=result)
+    return result
 
-def generate_next_chat_item(request):
-    next_prompt = request.args.get("next_prompt")
-    next_id = request.args.get("next_id")
-    next_class = request.args.get("next_class")
-    next_tag = request.args.get("next_tag")
-    return [{"role": "user", "content": "Do the following to the element with id {next_id}: {prompt}"}]
+def generate_next_chat_items(params):
+    previous_code = params[ "previous_code" ]
+    next_id = params[ "next_id" ]
+    next_class = params[ "next_class" ]
+    next_prompt = params[ "next_prompt" ]
+    next_tag = params[ "next_tag" ]
+
+    chat_items = [ {"role": "user", "content": "Do the following to the element with id {}: {}".format(next_id, next_prompt)} ]
+
+    if previous_code is not None:
+        chat_items = chat_items + [ {"role": "assistant", "content": previous_code} ]
+    return chat_items
 
 def restart_chat():
     with open(".chat.json", "w") as f:
@@ -90,8 +119,6 @@ def format_response(text):
 '''
 Example prompt: A moving carousel of random images, one of them can be selected and is highlighted. Below a button says "set as wallpaper".
 '''
-def generate_prompt(description):
-    return """Create html code for the following web page: {}.""".format(description)
 
 restart_chat()
 x = load_chat()
