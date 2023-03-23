@@ -77,13 +77,13 @@ def generate_next_chat_items(params):
         previous_code = params[ "previous_code" ]
         chat_items = [ 
             {"role": "assistant", "content": previous_code},
-            {"role": "user", "content": "To the previous html code do the following change: {}".format(next_prompt)} 
+            {"role": "user", "content": "To the previous html code do the following change: {}. Return the full functional html code".format(next_prompt)} 
         ]
     else:
         previous_code = params[ "previous_code" ]
         chat_items = [ 
             {"role": "assistant", "content": previous_code},
-            {"role": "user", "content": "Do the following to the element with id {}: {}".format(next_id, next_prompt)} 
+            {"role": "user", "content": "Do the following to the element with id {}: {}. Return the full functional html code".format(next_id, next_prompt)} 
         ]
     return chat_items
 
