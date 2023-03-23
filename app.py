@@ -71,7 +71,7 @@ def generate_next_chat_items(params):
     next_prompt = params[ "next_prompt" ]
     next_tag = params[ "next_tag" ]
 
-    if "previous_code" in params.keys():
+    if "previous_code" in params.keys() or params["previous_code"] == "":
         previous_code = params[ "previous_code" ]
         chat_items = [ 
             {"role": "assistant", "content": previous_code},
