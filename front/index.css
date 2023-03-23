@@ -28,3 +28,52 @@ iframe {
 #edit-prompt {
     height: 100px;
 }
+#clippy {
+    position: fixed;
+    width: 100px;
+    border-radius: 55px;
+    right: 10px;
+    top: 10px;
+}
+
+#loading-skely {
+    visibility: hidden;
+    z-index: 10;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 100vw;
+    height: 100vh;
+    background-color: black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.speech-bubble {
+	position: fixed;
+    font-size: 18pt;
+    padding: 20px;
+    right: 120px;
+    width: 400px;
+    height: 150px;
+    top: 10px;
+	background: #f9f06b;
+	border-radius: .4em;
+}
+
+.speech-bubble:after {
+	content: '';
+	position: absolute;
+	right: 0;
+	top: 50%;
+	width: 0;
+	height: 0;
+	border: 29px solid transparent;
+	border-left-color: #f9f06b;
+	border-right: 0;
+	border-top: 0;
+	margin-top: -14.5px;
+	margin-right: -29px;
+}

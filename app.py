@@ -2,11 +2,31 @@ import os
 
 import openai
 import time
-from flask import Flask, redirect, render_template, request, url_for
+from flask import Flask, redirect, render_template, request, url_for, send_from_directory
+from werkzeug.utils import secure_filename
+import ffmpeg
+import uuid
 
 app = Flask(__name__)
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
+@app.route("/webgpt/<path:path>", methods=["GET"])
+def webgpt_index(path):
+    return send_from_directory("front", path)
+
+@app.route("/whisper", methods=["POST"])
+def whisper():
+    file = request.files["audio"]
+    filename = secure_filename(file.filename)
+    file.save(filename)
+    file.stream.seek(0)
+    file.close()
+    outfile = f"audio-{uuid.uuid4()}.mp3"
+    ffmpeg.input(filename).output(outfile).run()
+    file = open(outfile, "rb")
+    transcript = openai.Audio.transcribe("whisper-1", file)
+    print(transcript)
+    return transcript["text"]
 
 @app.route("/", methods=("GET", "POST"))
 def index(): 
