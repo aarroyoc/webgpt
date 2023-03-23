@@ -127,20 +127,3 @@ def format_response(text):
     clean_text = "\n".join(lines[indexes[0]+1: indexes[1]])
     print("clean output: {}".format(clean_text))
     return clean_text
-'''
-Example prompt: A moving carousel of random images, one of them can be selected and is highlighted. Below a button says "set as wallpaper".
-'''
-
-x = """
-sure, here it is:
-```html
-<html>
-</html>
-```
-I hope you like it
-"""
-a = x.splitlines()
-indexes = [i for i in range(len(a)) if a[i].startswith("```")]
-cleanlines = a[indexes[0]+1: indexes[1]]
-clean_text = "\n".join(cleanlines)
-print(clean_text)
