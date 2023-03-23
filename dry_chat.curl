@@ -1,0 +1,12 @@
+curl -X 'POST' \
+  'http://localhost:5000/dryrun' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H 'X-API-Key: key' \
+  -d '{
+  "previous_code": "<body>Hello</body>",
+  "next_id": "an_id",
+  "next_class": "a_class",
+  "next_prompt": "Set a blue background",
+  "next_tag": "a_tag"
+}'

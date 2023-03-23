@@ -1,0 +1,11 @@
+curl -X 'POST' \
+  'http://localhost:5000/' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -H 'X-API-Key: key' \
+  -d '{
+  "next_prompt": "A gallery of images and a button that says 'xxx'. Blue background",
+  "next_id": "",
+  "next_class": "",
+  "next_tag": ""
+}'
