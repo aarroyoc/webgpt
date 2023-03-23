@@ -67,9 +67,7 @@ def index():
 
 def generate_next_chat_items(params):
     next_id = params[ "next_id" ]
-    next_class = params[ "next_class" ]
     next_prompt = params[ "next_prompt" ]
-    next_tag = params[ "next_tag" ]
 
     if params["previous_code"] == "":
         chat_items = [ 
