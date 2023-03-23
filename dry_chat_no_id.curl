@@ -4,9 +4,9 @@ curl -X 'POST' \
   -H 'Content-Type: application/json' \
   -H 'X-API-Key: key' \
   -d '{
-  "previous_code": "",
-  "next_prompt": "A gallery of images and a button that says 'xxx'. Blue background",
+  "previous_code": "<body>Hello</body>",
   "next_id": "",
-  "next_class": "",
-  "next_tag": ""
+  "next_class": "a_class",
+  "next_prompt": "Set a blue background",
+  "next_tag": "a_tag"
 }'
