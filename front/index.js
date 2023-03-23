@@ -12,8 +12,6 @@ let code = "";
 
 const context = {
     "id": "",
-    "className": "",
-    "tag": "",
 };
 
 function uuidv4() {
@@ -35,8 +33,6 @@ async function requestCompletion(code, next_prompt) {
 	"previous_code": code,
 	"next_prompt": next_prompt,
 	"next_id": context.id,
-	"next_class": context.className,
-	"next_tag": context.tag,
     };
     loadingSkely.style.visibility = "inherit";
     const request = await fetch("/", {
@@ -58,9 +54,7 @@ function eventizeDOM(dom) {
     	    evt.stopPropagation();
 	    editPrompt.value = "";
 	    editDialog.showModal();
-	    context.tag = evt.target.tagName;
 	    context.id = evt.target.id;
-	    context.className = evt.target.className;
 	});
     } else {
 	for(let children of dom.children) {
@@ -71,9 +65,7 @@ function eventizeDOM(dom) {
 	    evt.stopPropagation();
 	    editPrompt.value = "";
 	    editDialog.showModal();
-	    context.tag = evt.target.tagName;
 	    context.id = evt.target.id;
-	    context.className = evt.target.className;
 	});
     }
 }
@@ -106,6 +98,7 @@ async function main() {
 	} else {
 	    code = await requestCompletion(code, setupDialog.returnValue);
 	    const safeCode = sanitizeCode(code);
+	    iframe.contentDocument.head = safeCode.head;
 	    iframe.contentDocument.body = safeCode.body;
 	}
     });
@@ -118,14 +111,14 @@ async function main() {
 	if(editDialog.returnValue !== "$cancel"){
 	    code = await requestCompletion(code, editDialog.returnValue);
 	    const safeCode = sanitizeCode(code);
+	    console.log(safeCode);
+	    iframe.contentDocument.head = safeCode.head;
 	    iframe.contentDocument.body = safeCode.body;
 	}
     });
 
     clippy.addEventListener("click", () => {
 	context.id = "";
-	context.tag = "";
-	context.className = "";
 	editPrompt.value = "";
 	editDialog.showModal();
     });
@@ -166,6 +159,7 @@ async function recordAudioAndRequestCompletion() {
 	    
 	    code = await requestCompletion(code, transcript);
 	    const safeCode = sanitizeCode(code);
+	    iframe.contentDocument.head = safeCode.head;
 	    iframe.contentDocument.body = safeCode.body;
 	});
 	mediaRecorder.stop();
