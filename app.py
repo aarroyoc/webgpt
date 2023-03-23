@@ -124,6 +124,8 @@ def store_html_code(text):
 def format_response(text):
     lines = text.splitlines()
     indexes = [i for i in range(len(lines)) if lines[i].startswith("```")]
+    if len(indexes) == 1:
+        indexes = indexes + len(lines)
     clean_text = "\n".join(lines[indexes[0]+1: indexes[1]])
     print("clean output: {}".format(clean_text))
     return clean_text
