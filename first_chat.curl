@@ -5,7 +5,6 @@ curl -X 'POST' \
   -H 'X-API-Key: key' \
   -d '{
   "next_prompt": "Set a blue background",
-  "previous_code": "<body>Hello</body>",
   "next_id": "",
   "next_class": "",
   "next_tag": ""

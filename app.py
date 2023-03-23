@@ -17,18 +17,11 @@ def restart():
 
 @app.route("/dryrun", methods=[ "POST" ])
 def dryrun(): 
-    print("---------------")
-    print("---------------")
-    print("---------------")
-    print(request.data)
-    print("---------------")
-    print("---------------")
     params = json.loads(request.data)
-    print(params)
     chat = load_chat()
     chat = chat + generate_next_chat_items(params)
-    dump_chat(chat)
     result="<html>new</html>"
+    dump_chat(chat)
 
     return compose_response(result) 
 
@@ -37,8 +30,8 @@ def compose_response(code):
 
 @app.route("/", methods=[ "POST" ])
 def index(): 
-    chat = load_chat()
     params = json.loads(request.data)
+    chat = load_chat()
     chat = chat + generate_next_chat_items(params)
     dump_chat(chat)
 
@@ -58,16 +51,18 @@ def index():
     return result
 
 def generate_next_chat_items(params):
-    previous_code = params[ "previous_code" ]
     next_id = params[ "next_id" ]
     next_class = params[ "next_class" ]
     next_prompt = params[ "next_prompt" ]
     next_tag = params[ "next_tag" ]
 
-    chat_items = [ {"role": "user", "content": "Do the following to the element with id {}: {}".format(next_id, next_prompt)} ]
+    if "previous_code" in params.keys():
+        previous_code = params[ "previous_code" ]
+        chat_items = [ {"role": "assistant", "content": previous_code} ]
+    else:
+        chat_items = []
 
-    if previous_code is not None:
-        chat_items = chat_items + [ {"role": "assistant", "content": previous_code} ]
+    chat_items = chat_items + [ {"role": "user", "content": "Do the following to the element with id {}: {}".format(next_id, next_prompt)} ]
     return chat_items
 
 def restart_chat():
