@@ -49,7 +49,7 @@ def compose_response(code):
     return json.dumps({"new_code": format_response(code)})
 
 def compose_response_div(code):
-    return json.dumps({"new_div": format_response(code)})
+    return json.dumps({"new_diff": format_response(code)})
 
 @app.route("/diff", methods=[ "POST" ])
 def div(): 
@@ -97,24 +97,17 @@ def index():
     return compose_response(result)
 
 def generate_next_chat_items(params):
-    next_id = params[ "next_id" ]
     next_prompt = params[ "next_prompt" ]
 
     if params["previous_code"] == "":
         chat_items = [ 
             {"role": "user", "content": "You are a web designer assistant that provides html code. The code you provide is always complete and functional. The image urls in your code are always working images from https://picsum.photos, all different. Give me the html code for a web like this: {}".format(next_prompt)} 
         ]
-    elif params["next_id"] == "":
-        previous_code = params[ "previous_code" ]
-        chat_items = [ 
-            {"role": "assistant", "content": "Here is the html code:\n```html\n{}\n```".format(previous_code)},
-            {"role": "user", "content": "To the previous html code do the following change: {}.".format(next_prompt)} 
-        ]
     else:
         previous_code = params[ "previous_code" ]
         chat_items = [ 
             {"role": "assistant", "content": "Here is the html code:\n```html\n{}\n```".format(previous_code)},
-            {"role": "user", "content": "Do the following modification to the element with id {}: {}.".format(next_id, next_prompt)} 
+            {"role": "user", "content": "To the previous html code do the following change: {}. Return the full functional html code".format(next_prompt)} 
         ]
     return chat_items
 
@@ -171,6 +164,10 @@ x="""
 ```html
 fff3
 ```
+"""
+print(format_response(x))
+x="""
+fff4
 """
 print(format_response(x))
 
