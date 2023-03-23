@@ -28,7 +28,6 @@ function uuidv4() {
 
 
 async function requestCompletion(code, next_prompt) {
-    // return "<html><body><h2>HE<i>L</i>LO</h2></body></html>";
     const requestBody = {
 	"previous_code": code,
 	"next_prompt": next_prompt,
@@ -45,6 +44,24 @@ async function requestCompletion(code, next_prompt) {
     loadingSkely.style.visibility = "hidden";    
     const json = await request.json();
     return json["new_code"];
+}
+
+async function requestDiffCompletion(id, next_prompt) {
+    const requestBody = {
+	"diff": iframe.contentDocument.getElementById(id).innerHTML,
+	"next_prompt": next_prompt,
+    };
+    loadingSkely.style.visibility = "inherit";
+    const request = await fetch("/", {
+	method: "POST",
+	headers: {
+	    "Content-Type": "application/json"
+	},
+	body: JSON.stringify(requestBody),
+    });
+    loadingSkely.style.visibility = "hidden";
+    const json = await request.json();
+    iframe.contentDocument.getElementById(id).innerHTML = json["new_diff"]
 }
 
 function eventizeDOM(dom) {
@@ -98,7 +115,7 @@ async function main() {
 	} else {
 	    code = await requestCompletion(code, setupDialog.returnValue);
 	    const safeCode = sanitizeCode(code);
-	    iframe.contentDocument.head = safeCode.head;
+	    iframe.contentDocument.head.innerHTML = safeCode.head.innerHTML;
 	    iframe.contentDocument.body = safeCode.body;
 	}
     });
@@ -109,11 +126,15 @@ async function main() {
 
     editDialog.addEventListener("close", async () => {
 	if(editDialog.returnValue !== "$cancel"){
-	    code = await requestCompletion(code, editDialog.returnValue);
-	    const safeCode = sanitizeCode(code);
-	    console.log(safeCode);
-	    iframe.contentDocument.head = safeCode.head;
-	    iframe.contentDocument.body = safeCode.body;
+	    if(context.id === ""){
+	        code = await requestCompletion(code, editDialog.returnValue);
+	        const safeCode = sanitizeCode(code);
+	        console.log(safeCode);
+	        iframe.contentDocument.head.innerHTML = safeCode.head.innerHTML;
+		iframe.contentDocument.body = safeCode.body;
+	    } else {
+		await requestDiffCompletion(context.id, editDialog.returnValue);
+	    }
 	}
     });
 
