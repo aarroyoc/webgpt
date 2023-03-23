@@ -71,14 +71,22 @@ def generate_next_chat_items(params):
     next_prompt = params[ "next_prompt" ]
     next_tag = params[ "next_tag" ]
 
-    if "previous_code" in params.keys() or params["previous_code"] == "":
+    if params["previous_code"] == "":
+        chat_items = [ 
+            {"role": "user", "content": "Give me the html code for a web like this: {}".format(next_prompt)} 
+        ]
+    elif params["next_id"] == "":
+        previous_code = params[ "previous_code" ]
+        chat_items = [ 
+            {"role": "assistant", "content": previous_code},
+            {"role": "user", "content": "To the previous html code do the following change: {}".format(next_prompt)} 
+        ]
+    else:
         previous_code = params[ "previous_code" ]
         chat_items = [ 
             {"role": "assistant", "content": previous_code},
             {"role": "user", "content": "Do the following to the element with id {}: {}".format(next_id, next_prompt)} 
         ]
-    else:
-        chat_items = [ {"role": "user", "content": "Give me the html code for a web like this: {}".format(next_prompt)} ]
     return chat_items
 
 def restart_chat():
