@@ -48,6 +48,34 @@ def dryrun():
 def compose_response(code):
     return json.dumps({"new_code": format_response(code)})
 
+def compose_response_div(code):
+    return json.dumps({"new_div": format_response(code)})
+
+@app.route("/diff", methods=[ "POST" ])
+def div(): 
+    params = json.loads(request.data)
+    chat = generate_div_items(params)
+    print ("diff chat: {}".format(chat))
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=chat        
+        )
+    print("diff response: {}".format(response))
+
+    result=response.choices[0].message.content
+
+    return compose_response_div(result)
+
+def generate_div_items(params):
+    diff = params[ "diff" ]
+    next_prompt = params[ "next_prompt" ]
+
+    chat_items = [ 
+        {"role": "user", "content": "You are a web designer assistant that provides html code. The image urls in your code are always working images from https://picsum.photos, all different. I have an initial html element like this: \"{}\". Make the following modifications to it and return it as code: {}".format(diff, next_prompt)} 
+    ]
+    return chat_items
+
+
 @app.route("/", methods=[ "POST" ])
 def index(): 
     params = json.loads(request.data)
@@ -55,10 +83,13 @@ def index():
     chat = chat + generate_next_chat_items(params)
     dump_chat(chat)
 
+    print("chat items: {}".format(chat))
+
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=chat        
         )
+    
     print("response: {}".format(response))
 
     result=response.choices[0].message.content
@@ -76,13 +107,13 @@ def generate_next_chat_items(params):
     elif params["next_id"] == "":
         previous_code = params[ "previous_code" ]
         chat_items = [ 
-            {"role": "assistant", "content": previous_code},
+            {"role": "assistant", "content": "Here is the html code:\n```html\n{}\n```".format(previous_code)},
             {"role": "user", "content": "To the previous html code do the following change: {}.".format(next_prompt)} 
         ]
     else:
         previous_code = params[ "previous_code" ]
         chat_items = [ 
-            {"role": "assistant", "content": previous_code},
+            {"role": "assistant", "content": "Here is the html code:\n```html\n{}\n```".format(previous_code)},
             {"role": "user", "content": "Do the following modification to the element with id {}: {}.".format(next_id, next_prompt)} 
         ]
     return chat_items
@@ -97,7 +128,6 @@ def restart_chat():
 def load_chat():
     with open(".chat.json") as f:
         chat = json.load(f)
-        print("chat file: {}".format(chat))
         return chat
 
 def dump_chat(chat):
@@ -111,16 +141,6 @@ def generate_next_response(text):
     clean_text = format_response(text)
     return [{"role": "assistant", "content": clean_text}]
 
-def store_html_code(text):
-    print("output: {}".format(text))
-    if text is not None:
-        clean_text = format_response(text)
-        timestamp = time.strftime("%Y%m%d-%H%M%S")
-        filename = f"web_{timestamp}.html"
-
-        with open(filename, "w") as f:
-            f.write(clean_text)
-
 def format_response(text):
     lines = text.splitlines()
     indexes = [i for i in range(len(lines)) if lines[i].startswith("```")]
@@ -129,7 +149,6 @@ def format_response(text):
     if len(indexes) == 1:
         indexes = indexes + len(lines)
     clean_text = "\n".join(lines[indexes[0]+1: indexes[1]])
-    print("clean output: {}".format(clean_text))
     return clean_text
 
 
@@ -154,3 +173,5 @@ fff3
 ```
 """
 print(format_response(x))
+
+print(generate_div_items({"diff": "<a>xx</a>", "next_prompt": "bigger" }))
