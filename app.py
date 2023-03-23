@@ -18,7 +18,7 @@ def index():
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
              messages=[
-                {"role": "system", "content": "You are a web designer."},
+                {"role": "system", "content": "You are a web designer. Your webs always have ids in the tags"},
                 {"role": "user", "content": prompt},
             ]
         )
@@ -26,6 +26,11 @@ def index():
         return redirect(url_for("index", result=response.choices[0].message.content))
 
     result = request.args.get("result")
+    next_prompt = request.args.get("next_prompt")
+    next_id = request.args.get("next_id")
+    next_class = request.args.get("next_class")
+    next_tag = request.args.get("next_tag")
+
     store_html_code(result)
 
     return render_template("index.html", result=result)
