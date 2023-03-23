@@ -48,11 +48,11 @@ async function requestCompletion(code, next_prompt) {
 
 async function requestDiffCompletion(id, next_prompt) {
     const requestBody = {
-	"diff": iframe.contentDocument.getElementById(id).innerHTML,
+	"diff": iframe.contentDocument.getElementById(id).outerHTML,
 	"next_prompt": next_prompt,
     };
     loadingSkely.style.visibility = "inherit";
-    const request = await fetch("/", {
+    const request = await fetch("/diff", {
 	method: "POST",
 	headers: {
 	    "Content-Type": "application/json"
@@ -61,7 +61,7 @@ async function requestDiffCompletion(id, next_prompt) {
     });
     loadingSkely.style.visibility = "hidden";
     const json = await request.json();
-    iframe.contentDocument.getElementById(id).innerHTML = json["new_diff"]
+    iframe.contentDocument.getElementById(id).outerHTML = json["new_diff"]
 }
 
 function eventizeDOM(dom) {
