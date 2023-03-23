@@ -1,0 +1,30 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+
+#setup-prompt {
+    width: 700px;
+    height: 300px;
+}
+iframe {
+    border: none;
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+}
+
+#edit div{
+    display: flex;
+    align-items: center;
+}
+
+#edit form {
+    display: flex;
+    flex-direction: column;
+}
+
+#edit-prompt {
+    height: 100px;
+}

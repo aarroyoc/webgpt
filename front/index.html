@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WebGPT - Create websites with ChatGPT!</title>
+    <meta charset="utf-8"/>
+    <link href="index.css" rel="stylesheet"/>
+    
+  </head>
+  <body>
+    <dialog id="setup">
+      <h1>WebGPT</h1>
+      <p>¡Bienvenido a WebGPT! Diseña tu web sin código hablando con ChatGPT. Proyecto EQUINOX de Jonatan Tierno y Adrián Arroyo.</p>
+      <p>Para comenzar, haz una descripción inicial de tu sitio web</p>
+      <form method="dialog">
+        <textarea id="setup-prompt"></textarea>
+        <button id="setup-confirm" value="default">GO!</button>
+      </form>
+    </dialog>
+    <dialog id="edit">
+      <div>
+      <img src="clippy.gif" width="128">
+	<form method="dialog">
+	  <p>¿Qué modificación quieres hacer?</p>
+	  <!-- <p>Contexto: <span id="edit-context"></span></p> -->
+	  <textarea id="edit-prompt"></textarea>
+	  <button id="edit-confirm" value="">GO!</button>
+	</form>
+      </div>
+    </dialog>
+    <iframe id="iframe"></iframe>
+    <script src="index.js"></script>
+  </body>
+</html>
