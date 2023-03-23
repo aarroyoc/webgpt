@@ -77,13 +77,13 @@ def generate_next_chat_items(params):
         previous_code = params[ "previous_code" ]
         chat_items = [ 
             {"role": "assistant", "content": previous_code},
-            {"role": "user", "content": "To the previous html code do the following change: {}".format(next_prompt)} 
+            {"role": "user", "content": "To the previous html code do the following change: {}. Return the full functional html code".format(next_prompt)} 
         ]
     else:
         previous_code = params[ "previous_code" ]
         chat_items = [ 
             {"role": "assistant", "content": previous_code},
-            {"role": "user", "content": "Do the following to the element with id {}: {}".format(next_id, next_prompt)} 
+            {"role": "user", "content": "Do the following to the element with id {}: {}. Return the full functional html code".format(next_id, next_prompt)} 
         ]
     return chat_items
 
@@ -124,23 +124,8 @@ def store_html_code(text):
 def format_response(text):
     lines = text.splitlines()
     indexes = [i for i in range(len(lines)) if lines[i].startswith("```")]
+    if len(indexes) == 1:
+        indexes = indexes + len(lines)
     clean_text = "\n".join(lines[indexes[0]+1: indexes[1]])
     print("clean output: {}".format(clean_text))
     return clean_text
-'''
-Example prompt: A moving carousel of random images, one of them can be selected and is highlighted. Below a button says "set as wallpaper".
-'''
-
-x = """
-sure, here it is:
-```html
-<html>
-</html>
-```
-I hope you like it
-"""
-a = x.splitlines()
-indexes = [i for i in range(len(a)) if a[i].startswith("```")]
-cleanlines = a[indexes[0]+1: indexes[1]]
-clean_text = "\n".join(cleanlines)
-print(clean_text)
