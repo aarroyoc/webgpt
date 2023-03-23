@@ -71,7 +71,7 @@ def generate_next_chat_items(params):
 
     if params["previous_code"] == "":
         chat_items = [ 
-            {"role": "user", "content": "Give me the html code for a web like this: {}".format(next_prompt)} 
+            {"role": "user", "content": "You are a web designer assistant that provides html code. The code you provide is always complete and functional. The image urls in your code are always working images from https://picsum.photos, all different. Give me the html code for a web like this: {}".format(next_prompt)} 
         ]
     elif params["next_id"] == "":
         previous_code = params[ "previous_code" ]
