@@ -62,6 +62,7 @@ async function requestDiffCompletion(id, next_prompt) {
     loadingSkely.style.visibility = "hidden";
     const json = await request.json();
     iframe.contentDocument.getElementById(id).outerHTML = json["new_diff"]
+    code = iframe.contentDocument.documentElement.outerHTML;
 }
 
 function eventizeDOM(dom) {
