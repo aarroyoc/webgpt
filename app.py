@@ -20,13 +20,13 @@ def dryrun():
     params = json.loads(request.data)
     chat = load_chat()
     chat = chat + generate_next_chat_items(params)
-    result="<html>new</html>"
     dump_chat(chat)
+    result="This is the code: \n```html\n<html>new</html>\n```I hope you like it"
 
     return compose_response(result) 
 
 def compose_response(code):
-    return json.dumps({"new_code": code})
+    return json.dumps({"new_code": format_response(code)})
 
 @app.route("/", methods=[ "POST" ])
 def index(): 
@@ -43,12 +43,7 @@ def index():
 
     result=response.choices[0].message.content
 
-    chat = load_chat() + generate_next_response(result)
-    dump_chat(chat)
-
-    store_html_code(result)
-
-    return result
+    return compose_response(result)
 
 def generate_next_chat_items(params):
     next_id = params[ "next_id" ]
@@ -58,11 +53,12 @@ def generate_next_chat_items(params):
 
     if "previous_code" in params.keys():
         previous_code = params[ "previous_code" ]
-        chat_items = [ {"role": "assistant", "content": previous_code} ]
+        chat_items = [ 
+            {"role": "assistant", "content": previous_code},
+            {"role": "user", "content": "Do the following to the element with id {}: {}".format(next_id, next_prompt)} 
+        ]
     else:
-        chat_items = []
-
-    chat_items = chat_items + [ {"role": "user", "content": "Do the following to the element with id {}: {}".format(next_id, next_prompt)} ]
+        chat_items = [ {"role": "user", "content": "Give me the html code for a web like this: {}".format(next_prompt)} ]
     return chat_items
 
 def restart_chat():
@@ -101,32 +97,24 @@ def store_html_code(text):
 
 def format_response(text):
     lines = text.splitlines()
-    print("lines:::::")
-    print(lines)
-    lines = list(itertools.dropwhile(lambda line: not line.startswith("```"), lines))
-    lines = list(itertools.filterfalse(lambda line: line.startswith("```"), lines))
-    print(lines)
-    print("lines:::::3")
-    print(lines)
-    clean_text = "\n".join(lines)
+    indexes = [i for i in range(len(lines)) if lines[i].startswith("```")]
+    clean_text = "\n".join(lines[indexes[0]+1: indexes[1]])
     print("clean output: {}".format(clean_text))
     return clean_text
 '''
 Example prompt: A moving carousel of random images, one of them can be selected and is highlighted. Below a button says "set as wallpaper".
 '''
 
-restart_chat()
-x = load_chat()
-x = x + [{"role":"user", "content": "y"}]
-dump_chat(x)
-
-x = load_chat()
-y = generate_next_response("""
-this is:
+x = """
+sure, here it is:
 ```html
-<y>
+<html>
+</html>
 ```
-""")
-print (y) 
-dump_chat (x + y)
-
+I hope you like it
+"""
+a = x.splitlines()
+indexes = [i for i in range(len(a)) if a[i].startswith("```")]
+cleanlines = a[indexes[0]+1: indexes[1]]
+clean_text = "\n".join(cleanlines)
+print(clean_text)
