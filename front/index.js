@@ -30,7 +30,7 @@ function uuidv4() {
 
 
 async function requestCompletion(code, next_prompt) {
-    return "<html><body><h2>HE<i>L</i>LO</h2></body></html>";
+    // return "<html><body><h2>HE<i>L</i>LO</h2></body></html>";
     const requestBody = {
 	"previous_code": code,
 	"next_prompt": next_prompt,
@@ -48,7 +48,7 @@ async function requestCompletion(code, next_prompt) {
     });
     loadingSkely.style.visibility = "hidden";    
     const json = await request.json();
-    return json["code"];
+    return json["new_code"];
 }
 
 function eventizeDOM(dom) {
@@ -85,7 +85,14 @@ function sanitizeCode(code) {
     return htmlDoc;
 }
 
-function main() {
+async function restart() {
+    return await fetch("/restart", {
+	method: "POST"
+    });
+}
+
+async function main() {
+    await restart();
     setupPrompt.value = "";
     const data = setupDialog.showModal();
 
@@ -166,4 +173,4 @@ async function recordAudioAndRequestCompletion() {
     }, 10000);
 }
 
-window.addEventListener("load", main);
+window.addEventListener("load", async () => main());
