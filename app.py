@@ -71,7 +71,7 @@ def generate_div_items(params):
     next_prompt = params[ "next_prompt" ]
 
     chat_items = [ 
-        {"role": "user", "content": "You are a web designer assistant that provides html code. The image urls in your code are always working images from https://picsum.photos, all different. I have an initial html element like this: \"{}\". Make the following modifications to it and return it as code: {}".format(diff, next_prompt)} 
+        {"role": "user", "content": "You are a web designer assistant that provides html code. The image urls in your code are always working images from https://picsum.photos, all different. I have an initial html element like this: \"{}\". Make the following modifications to it and return it as code: {}. Respect the style of the parentg".format(diff, next_prompt)} 
     ]
     return chat_items
 
@@ -87,7 +87,8 @@ def index():
 
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
-        messages=chat        
+        messages=chat,
+        temperature=0       
         )
     
     print("response: {}".format(response))
@@ -142,6 +143,12 @@ def format_response(text):
     if len(indexes) == 1:
         indexes = indexes + len(lines)
     clean_text = "\n".join(lines[indexes[0]+1: indexes[1]])
+
+    if not clean_text.strip().startswith("<"):
+        index = clean_text.find("<")
+        if index >= 0:
+            clean_text = clean_text[index:len(clean_text)]
+
     return clean_text
 
 
@@ -168,6 +175,10 @@ fff3
 print(format_response(x))
 x="""
 fff4
+"""
+print(format_response(x))
+x="""
+fff5\n\n<x>
 """
 print(format_response(x))
 
