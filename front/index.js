@@ -71,10 +71,10 @@ function eventizeDOM(dom) {
 	dom.id = uuidv4();
 	dom.addEventListener("click", (evt) => {
     	    evt.stopPropagation();
+	    dom.style.border = "0px";
 	    editPrompt.value = "";
 	    editDialog.showModal();
 	    context.id = evt.target.id;
-	    dom.style.border = "0px";
 	});
 	dom.addEventListener("mouseenter", (evt) => {
     	    evt.stopPropagation();
