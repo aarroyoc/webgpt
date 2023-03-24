@@ -150,36 +150,3 @@ def format_response(text):
             clean_text = clean_text[index:len(clean_text)]
 
     return clean_text
-
-
-x="""
-hola
-```html
-fff
-```
-adios
-"""
-print(format_response(x))
-x="""
-hola
-```html
-fff2
-```
-"""
-print(format_response(x))
-x="""
-```html
-fff3
-```
-"""
-print(format_response(x))
-x="""
-fff4
-"""
-print(format_response(x))
-x="""
-fff5\n\n<x>
-"""
-print(format_response(x))
-
-print(generate_div_items({"diff": "<a>xx</a>", "next_prompt": "bigger" }))
