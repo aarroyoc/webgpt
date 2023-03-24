@@ -75,6 +75,14 @@ function eventizeDOM(dom) {
 	    editDialog.showModal();
 	    context.id = evt.target.id;
 	});
+	dom.addEventListener("mouseenter", (evt) => {
+    	    evt.stopPropagation();
+	    dom.style.border = "5px solid red";
+	})
+	dom.addEventListener("mouseleave", (evt) => {
+    	    evt.stopPropagation();
+	    dom.style.border = "0px";
+	})
     } else {
 	for(let children of dom.children) {
 	    eventizeDOM(children);

@@ -139,10 +139,11 @@ def format_response(text):
     lines = text.splitlines()
     indexes = [i for i in range(len(lines)) if lines[i].startswith("```")]
     if len(indexes) == 0:
-        indexes = [0, len(lines)]
-    if len(indexes) == 1:
-        indexes = indexes + len(lines)
-    clean_text = "\n".join(lines[indexes[0]+1: indexes[1]])
+        clean_text = "\n".join(lines)
+    elif len(indexes) == 1:
+        clean_text = "\n".join(lines[indexes[0]+1: len(lines)])
+    else:
+        clean_text = "\n".join(lines[indexes[0]+1: indexes[1]])
 
     if not clean_text.strip().startswith("<"):
         index = clean_text.find("<")
@@ -150,36 +151,3 @@ def format_response(text):
             clean_text = clean_text[index:len(clean_text)]
 
     return clean_text
-
-
-x="""
-hola
-```html
-fff
-```
-adios
-"""
-print(format_response(x))
-x="""
-hola
-```html
-fff2
-```
-"""
-print(format_response(x))
-x="""
-```html
-fff3
-```
-"""
-print(format_response(x))
-x="""
-fff4
-"""
-print(format_response(x))
-x="""
-fff5\n\n<x>
-"""
-print(format_response(x))
-
-print(generate_div_items({"diff": "<a>xx</a>", "next_prompt": "bigger" }))
