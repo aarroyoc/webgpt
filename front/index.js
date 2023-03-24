@@ -74,6 +74,7 @@ function eventizeDOM(dom) {
 	    editPrompt.value = "";
 	    editDialog.showModal();
 	    context.id = evt.target.id;
+	    dom.style.border = "0px";
 	});
 	dom.addEventListener("mouseenter", (evt) => {
     	    evt.stopPropagation();
