@@ -7,6 +7,7 @@ const editConfirm = document.getElementById("edit-confirm");
 const iframe = document.getElementById("iframe");
 const clippy = document.getElementById("clippy");
 const loadingSkely = document.getElementById("loading-skely");
+const hearing = document.getElementById("hearing");
 
 let code = "";
 
@@ -112,7 +113,7 @@ async function main() {
 
     setupDialog.addEventListener("close", async () => {
 	if(setupDialog.returnValue === "$audio") {
-	    await recordAudioAndRequestCompletion();
+	    //await recordAudioAndRequestCompletion();
 	} else {
 	    code = await requestCompletion(code, setupDialog.returnValue);
 	    const safeCode = sanitizeCode(code);
@@ -144,49 +145,63 @@ async function main() {
 	editPrompt.value = "";
 	editDialog.showModal();
     });
-}
 
-async function recordAudioAndRequestCompletion() {
-    const stream = await navigator.mediaDevices.getUserMedia({audio: true});
-    const mediaRecorder = new MediaRecorder(stream, {mimeType: "audio/webm"});
-    const audioBlobs = [];
+    let stream = null;
+    let mediaRecorder = null;
+    let audioBlobs = [];
 
-    mediaRecorder.addEventListener("dataavailable", (evt) => {
-	audioBlobs.push(evt.data);
+    window.addEventListener("keydown", async (evt) => {
+	if(evt.key === " " && mediaRecorder === null){
+	    hearing.style.visibility = "inherit";
+	    if(setupDialog.open){
+		setupDialog.close("$audio");
+	    }
+	    stream = await navigator.mediaDevices.getUserMedia({audio: true});
+	    mediaRecorder = new MediaRecorder(stream, {mimeType: "audio/webm"});
+	    audioBlobs = [];
+
+	    mediaRecorder.addEventListener("dataavailable", (evt) => {
+		audioBlobs.push(evt.data);
+	    });
+
+	    mediaRecorder.start();
+	}
     });
 
-    mediaRecorder.start();
+    window.addEventListener("keyup", async (evt) => {
+	if(evt.key === " " && mediaRecorder !== null){
+	    hearing.style.visibility = "hidden";
+            mediaRecorder.addEventListener("stop", async (evt) => {
+		const audioBlob = new Blob(audioBlobs, {type: "audio/webm"});
+		console.log(URL.createObjectURL(audioBlob));
+		const formData = new FormData();
+		formData.append("audio", audioBlob, "audio.webm");
 
-    setTimeout(() => {
-	const mimeType = mediaRecorder.mimeType;
+		const request = await fetch("/whisper", {
+		    method: "POST",
+		    body: formData,
+		});
+		const transcript = await request.text();
 
-	mediaRecorder.addEventListener("stop", async (evt) => {
-	    const audioBlob = new Blob(audioBlobs, {type: mimeType});
-	    const formData = new FormData();
-	    formData.append("audio", audioBlob, "audio.webm");
+		const div = document.createElement("div");
+		div.className = "speech-bubble";
+		div.textContent = transcript;
+		document.body.appendChild(div);
+		setTimeout(() => {
+		    document.body.removeChild(div);
+		}, 5000);
 
-	    const request = await fetch("/whisper", {
-		method: "POST",
-		body: formData,
+		code = await requestCompletion(code, transcript);
+		const safeCode = sanitizeCode(code);
+		iframe.contentDocument.head.innerHTML = safeCode.head.innerHTML;
+		iframe.contentDocument.body = safeCode.body;
 	    });
-	    const transcript = await request.text();
-
-	    const div = document.createElement("div");
-	    div.className = "speech-bubble";
-	    div.textContent = transcript;
-	    document.body.appendChild(div);
-	    //setTimeout(() => {
-	    //	 document.body.removeChild(div);
-	    //}, 5000);
-	    
-	    code = await requestCompletion(code, transcript);
-	    const safeCode = sanitizeCode(code);
-	    iframe.contentDocument.head = safeCode.head;
-	    iframe.contentDocument.body = safeCode.body;
-	});
-	mediaRecorder.stop();
-	stream.getTracks().forEach(track => track.stop());
-    }, 10000);
+	    mediaRecorder.stop();
+	    stream.getTracks().forEach(track => track.stop());
+	    stream = null;
+	    mediaRecorder = null;
+	}
+    });
 }
 
 window.addEventListener("load", async () => main());
