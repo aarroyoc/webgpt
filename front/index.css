@@ -36,6 +36,23 @@ iframe {
     right: 10px;
     top: 10px;
 }
+#go-back {
+    z-index: 50;
+    position: fixed;
+    width: 100px;
+    border-radius: 55px;
+    right: 10px;
+    top: 120px;
+}
+#go-forward {
+    z-index: 50;
+    position: fixed;
+    width: 100px;
+    border-radius: 55px;
+    right: 0px;
+    top: 230px;
+    transform: rotate(180deg);
+}
 
 #loading-skely {
     visibility: hidden;
@@ -45,7 +62,7 @@ iframe {
     left: 0px;
     width: 100vw;
     height: 100vh;
-    background-color: black;
+    background: radial-gradient(circle at center, black 0, black 35%, grey 100%);
     display: flex;
     align-items: center;
     justify-content: center;

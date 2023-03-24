@@ -26,7 +26,7 @@ def whisper():
     outfile = f"audio-{uuid.uuid4()}.mp3"
     ffmpeg.input(filename).output(outfile).run()
     file = open(outfile, "rb")
-    transcript = openai.Audio.transcribe("whisper-1", file)
+    transcript = openai.Audio.transcribe("whisper-1", file, language="en")
     print(transcript)
     return transcript["text"]
 

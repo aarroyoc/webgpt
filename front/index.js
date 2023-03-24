@@ -8,8 +8,12 @@ const iframe = document.getElementById("iframe");
 const clippy = document.getElementById("clippy");
 const loadingSkely = document.getElementById("loading-skely");
 const hearing = document.getElementById("hearing");
+const goBack = document.getElementById("go-back");
+const goForward = document.getElementById("go-forward");
 
-let code = "";
+
+let code = [];
+let codePos = -1;
 
 const context = {
     "id": "",
@@ -27,6 +31,10 @@ function uuidv4() {
   return uuid.map((x) => x.toString(16)).join('');
 }
 
+function enableHistory() {
+    goBack.src = "arrow.webp";
+    goForward.src = "arrow.webp";
+}
 
 async function requestCompletion(code, next_prompt) {
     const requestBody = {
@@ -63,7 +71,8 @@ async function requestDiffCompletion(id, next_prompt) {
     loadingSkely.style.visibility = "hidden";
     const json = await request.json();
     iframe.contentDocument.getElementById(id).outerHTML = json["new_diff"]
-    code = iframe.contentDocument.documentElement.outerHTML;
+    code.push(iframe.contentDocument.documentElement.outerHTML);
+    codePos = code.length - 1;
 }
 
 function eventizeDOM(dom) {
@@ -124,10 +133,12 @@ async function main() {
 	if(setupDialog.returnValue === "$cancel") {
 	    //await recordAudioAndRequestCompletion();
 	} else {
-	    code = await requestCompletion(code, setupDialog.returnValue);
-	    const safeCode = sanitizeCode(code);
+	    code.push(await requestCompletion("", setupDialog.returnValue));
+	    codePos = code.length-1;
+	    const safeCode = sanitizeCode(code[codePos]);
 	    iframe.contentDocument.head.innerHTML = safeCode.head.innerHTML;
 	    iframe.contentDocument.body = safeCode.body;
+	    enableHistory();
 	}
     });
 
@@ -138,8 +149,9 @@ async function main() {
     editDialog.addEventListener("close", async () => {
 	if(editDialog.returnValue !== "$cancel"){
 	    if(context.id === ""){
-	        code = await requestCompletion(code, editDialog.returnValue);
-	        const safeCode = sanitizeCode(code);
+	        code.push(await requestCompletion(code[codePos], editDialog.returnValue));
+		codePos = code.length - 1;
+	        const safeCode = sanitizeCode(code[codePos]);
 	        iframe.contentDocument.head.innerHTML = safeCode.head.innerHTML;
 		iframe.contentDocument.body = safeCode.body;
 	    } else {
@@ -152,6 +164,24 @@ async function main() {
 	context.id = "";
 	editPrompt.value = "";
 	editDialog.showModal();
+    });
+
+    goBack.addEventListener("click", () => {
+	if(codePos > 0) {
+	    codePos--;
+	    const safeCode = sanitizeCode(code[codePos]);
+	    iframe.contentDocument.head.innerHTML = safeCode.head.innerHTML;
+	    iframe.contentDocument.body = safeCode.body;
+	}
+    });
+
+    goForward.addEventListener("click", () => {
+	if(codePos < code.length - 1) {
+	    codePos++;
+	    const safeCode = sanitizeCode(code[codePos]);
+	    iframe.contentDocument.head.innerHTML = safeCode.head.innerHTML;
+	    iframe.contentDocument.body = safeCode.body;
+	}
     });
 
     let stream = null;
@@ -205,10 +235,16 @@ async function main() {
 		}, 5000);
 
 		if(context.id === ""){
-		    code = await requestCompletion(code, transcript);
-		    const safeCode = sanitizeCode(code);
+		    if(codePos === -1){
+			code.push(await requestCompletion("", transcript));
+		    } else {
+		        code.push(await requestCompletion(code[codePos], transcript));
+		    }
+		    codePos = code.length - 1;
+		    const safeCode = sanitizeCode(code[codePos]);
 		    iframe.contentDocument.head.innerHTML = safeCode.head.innerHTML;
 		    iframe.contentDocument.body = safeCode.body;
+		    enableHistory();
 		} else {
          	    await requestDiffCompletion(context.id, transcript);
 		}
