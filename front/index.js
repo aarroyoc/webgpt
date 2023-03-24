@@ -112,7 +112,7 @@ async function main() {
     });
 
     setupDialog.addEventListener("close", async () => {
-	if(setupDialog.returnValue === "$audio") {
+	if(setupDialog.returnValue === "$cancel") {
 	    //await recordAudioAndRequestCompletion();
 	} else {
 	    code = await requestCompletion(code, setupDialog.returnValue);
@@ -131,7 +131,6 @@ async function main() {
 	    if(context.id === ""){
 	        code = await requestCompletion(code, editDialog.returnValue);
 	        const safeCode = sanitizeCode(code);
-	        console.log(safeCode);
 	        iframe.contentDocument.head.innerHTML = safeCode.head.innerHTML;
 		iframe.contentDocument.body = safeCode.body;
 	    } else {
@@ -151,10 +150,14 @@ async function main() {
     let audioBlobs = [];
 
     window.addEventListener("keydown", async (evt) => {
-	if(evt.key === " " && mediaRecorder === null){
+	if(evt.key === "*" && mediaRecorder === null){
+	    evt.stopPropagation();
 	    hearing.style.visibility = "inherit";
 	    if(setupDialog.open){
-		setupDialog.close("$audio");
+		setupDialog.close("$cancel");
+	    }
+	    if(editDialog.open){
+		editDialog.close("$cancel");
 	    }
 	    stream = await navigator.mediaDevices.getUserMedia({audio: true});
 	    mediaRecorder = new MediaRecorder(stream, {mimeType: "audio/webm"});
@@ -165,15 +168,16 @@ async function main() {
 	    });
 
 	    mediaRecorder.start();
+	    window.focus();
 	}
     });
 
     window.addEventListener("keyup", async (evt) => {
-	if(evt.key === " " && mediaRecorder !== null){
+	if(evt.key === "*"){
+	    evt.stopPropagation();
 	    hearing.style.visibility = "hidden";
             mediaRecorder.addEventListener("stop", async (evt) => {
 		const audioBlob = new Blob(audioBlobs, {type: "audio/webm"});
-		console.log(URL.createObjectURL(audioBlob));
 		const formData = new FormData();
 		formData.append("audio", audioBlob, "audio.webm");
 
@@ -191,10 +195,14 @@ async function main() {
 		    document.body.removeChild(div);
 		}, 5000);
 
-		code = await requestCompletion(code, transcript);
-		const safeCode = sanitizeCode(code);
-		iframe.contentDocument.head.innerHTML = safeCode.head.innerHTML;
-		iframe.contentDocument.body = safeCode.body;
+		if(context.id === ""){
+		    code = await requestCompletion(code, transcript);
+		    const safeCode = sanitizeCode(code);
+		    iframe.contentDocument.head.innerHTML = safeCode.head.innerHTML;
+		    iframe.contentDocument.body = safeCode.body;
+		} else {
+         	    await requestDiffCompletion(context.id, transcript);
+		}
 	    });
 	    mediaRecorder.stop();
 	    stream.getTracks().forEach(track => track.stop());
